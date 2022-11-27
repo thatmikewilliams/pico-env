@@ -1,9 +1,8 @@
 import urequests as requests
 import json
-#import hashlib
 from local.logger import Logger
 
-__log = Logger("dweeter")
+__log = Logger("Dweeter")
 class Dweeter:
     def __init__(self, thing):
         __log.debug(f"__init__({thing})")

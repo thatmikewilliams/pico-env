@@ -37,10 +37,10 @@ class PowerMonitor:
         power_dict["empty_battery_voltage"] = __empty_battery
         
         calculated_percentage = 100 * ((voltage - __empty_battery) / (__full_battery - __empty_battery))
-        if calculated_percentage > 100:
-            percentage = 100.00
-        else:
-            percentage = calculated_percentage
+        percentage = calculated_percentage
+        percentage = min([percentage, 100])
+        percentage = max([0, percentage])
+        
         power_dict["battery_charge_calculated_percent"] = calculated_percentage
         power_dict["battery_charge_percent"] = percentage
 

@@ -32,7 +32,7 @@ class Dweeter:
         headers = {'Content-Type': 'application/json'}
         __log.debug(f"headers={headers}")
         
-        response = requests.post(post_url, headers=headers, data=body)
+        response = requests.post(post_url, headers=headers, data=body, timeout=10)
         response_dict = {
             "status_code" : response.status_code,
             "headers" : response.headers,
@@ -42,3 +42,5 @@ class Dweeter:
         __log.debug("response:", response_dict)
         
         return response.status_code == 204
+
+

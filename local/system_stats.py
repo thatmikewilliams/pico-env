@@ -68,5 +68,3 @@ class SystemStats:
             }
         __log.debug("describe:", desc)
         return desc
-
-

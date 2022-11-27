@@ -42,5 +42,3 @@ class Dweeter:
         __log.debug("response:", response_dict)
         
         return response.status_code == 204
-
-

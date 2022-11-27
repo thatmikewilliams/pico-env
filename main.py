@@ -65,4 +65,3 @@ while True:
         blinking_sleep(10, 1)
 
 machine.reset()
-

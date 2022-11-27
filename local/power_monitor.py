@@ -74,5 +74,3 @@ def blinking_sleep(seconds, rate=5):
         toggle_onboard_led()
         time.sleep(1/rate)
 
-
-

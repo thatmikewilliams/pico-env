@@ -7,7 +7,8 @@ __log = Logger("PowerMonitor")
 # reads the system input voltage
 # original code had ADC(29) but this causes the picow board to hang 
 #__vsys = ADC(3)
-__external_power_indicator = machine.Pin(24, machine.Pin.IN)
+# on the picow the vbus sense is on the internal pin WL_GUIO2, not on GPIO24
+__external_power_indicator = machine.Pin("WL_GPIO2", machine.Pin.IN)
 # these are our reference voltages for a full/empty battery, in volts
 __full_battery = 4.2
 # the values could vary by battery size/manufacturer so you might need to adjust them

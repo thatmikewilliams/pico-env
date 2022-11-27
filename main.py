@@ -1,21 +1,20 @@
 import machine
-from machine import Pin
 import time
-from breakout_bme68x import BreakoutBME68X, STATUS_HEATER_STABLE, STATUS_GAS_VALID
-from pimoroni_i2c import PimoroniI2C
-import breakout_bme68x
-
-import gc
-import machine
 
 from local.connected_wlan import ConnectedWLAN
 from local.bme68x import BME68X
+from local.power_monitor import PowerMonitor
 from local.dweeter import Dweeter
 
-    
+run_count = 0
+exception_count = 0
+last_exception = "n/a"
+
 def init_components():
     global bme
     bme = BME68X()
+    global power_monitor
+    power_monitor = PowerMonitor()
     global wlan
     wlan = ConnectedWLAN()
     global dweeter
@@ -26,7 +25,14 @@ def do_dweet():
         "bme" : {
             "description" : bme.describe(),
             "value" : bme.read()
-            }
+            },
+        "power_monitor" : {
+            "description" : power_monitor.describe(),
+            "value" : power_monitor.read()
+            },
+        "run_count" : run_count,
+        "exception_count" : exception_count,
+        "last_exception" : last_exception
         }
     dweeter.dweet(dweet)
 
@@ -36,7 +42,7 @@ def deep_sleep(seconds):
     machine.deepsleep(seconds)
 
 def toggle_onboard_led():
-    Pin("LED", Pin.OUT).toggle()
+    machine.Pin("LED", machine.Pin.OUT).toggle()
 
 def blinking_sleep(seconds, rate=5):
     print(f"sleeping for {seconds}s")
@@ -52,21 +58,17 @@ blinking_sleep(reset_cause, 2)
 time.sleep(1)
 blinking_sleep(5)
 
-try:
-    init_components()
-    while True:
+init_components()
+while True:
+    blinking_sleep(2,10)
+    try:
+        run_count = run_count + 1
         do_dweet()
-        blinking_sleep(60,0.5)
-except Exception as e:
-    print(e)
-    blinking_sleep(10, 1)
-    raise e
-#    raise e
-
+    except Exception as e:
+        print(e)
+        exception_count = exception_count + 1
+        last_exception = str(e)
+        blinking_sleep(10, 1)
 
 machine.reset()
-#deep_sleep(20)
-#time.sleep(1)
-#print("resetting")
-#time.sleep(1)
-#machine.reset()
+

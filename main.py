@@ -5,10 +5,7 @@ from local.connected_wlan import ConnectedWLAN
 from local.bme68x import BME68X
 from local.power_monitor import PowerMonitor
 from local.dweeter import Dweeter
-
-run_count = 0
-exception_count = 0
-last_exception = "n/a"
+from local.system_stats import SystemStats
 
 def init_components():
     global bme
@@ -19,6 +16,8 @@ def init_components():
     wlan = ConnectedWLAN()
     global dweeter
     dweeter = Dweeter(wlan.get_mac_address())
+    global system_stats
+    system_stats = SystemStats()
     
 def do_dweet():
     dweet = {
@@ -30,9 +29,10 @@ def do_dweet():
             "description" : power_monitor.describe(),
             "value" : power_monitor.read()
             },
-        "run_count" : run_count,
-        "exception_count" : exception_count,
-        "last_exception" : last_exception
+        "system_stats" : {
+            "description" : system_stats.describe(),
+            "value" : system_stats.read()
+            }
         }
     dweeter.dweet(dweet)
 
@@ -51,23 +51,17 @@ def blinking_sleep(seconds, rate=5):
         time.sleep(1/rate)
 
 
-# check if the device woke from a deep sleep
-reset_cause = machine.reset_cause()
-print(f"reset cause: {reset_cause}")
-blinking_sleep(reset_cause, 2)
-time.sleep(1)
 blinking_sleep(5)
-
 init_components()
+
 while True:
     blinking_sleep(2,10)
     try:
-        run_count = run_count + 1
+        system_stats.add_run()
         do_dweet()
     except Exception as e:
+        system_stats.add_exception(e)
         print(e)
-        exception_count = exception_count + 1
-        last_exception = str(e)
         blinking_sleep(10, 1)
 
 machine.reset()

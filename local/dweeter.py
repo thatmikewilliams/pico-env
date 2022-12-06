@@ -18,6 +18,8 @@ class Dweeter:
             if err.errno == -6:
                 __log.error(err, "Perhaps the WLAN isn't connected?")
             raise err
+        finally:
+            urequests.usocket.reset()
         
         __log.debug(f"dweet: {success}")
         return success

@@ -1,5 +1,8 @@
 import machine
 import gc
+import sys
+import io
+import os
 from local.logger import Logger
 
 __log = Logger("SystemStats")
@@ -7,6 +10,7 @@ class SystemStats:
     def __init__(self):
         __log.debug("__init__")
         self.reset()
+        self.exceptions = {}
         
     def reset(self):
         self.start_datetime = machine.RTC().datetime()
@@ -20,7 +24,15 @@ class SystemStats:
         
     def add_exception(self, ex):
         self.exception_count = self.exception_count + 1
-        self.last_exception = str(ex)
+        buf = io.StringIO()
+        sys.print_exception(ex, buf)
+        self.last_exception = buf.getvalue()
+        
+        ex_class_name = type(ex).__name__
+        if ex_class_name in self.exceptions.keys():
+            self.exceptions[ex_class_name] = self.exceptions[ex_class_name] + 1
+        else:
+            self.exceptions[ex_class_name] = 1
         
     def __formatted_start_date(self):
         return f"{self.start_datetime[2]:02d}/{self.start_datetime[1]:02d}/{self.start_datetime[0]:04d}"
@@ -45,6 +57,10 @@ class SystemStats:
             "threshold" : gc.threshold()
             }
         return d
+    
+    def __disk_free(self):
+        vfs = os.statvfs('')
+        return vfs[0]*vfs[3]/1024
              
     def read(self):
         __log.debug("read()")
@@ -56,7 +72,9 @@ class SystemStats:
             "last_exception" : self.last_exception,
             "cpu_temperature" : self.__get_cpu_temperature_degrees_c(),
             "reset_cause" : self.reset_cause,
-            "gc" : self.__read_gc()
+            "gc" : self.__read_gc(),
+            "disk_free" : self.__disk_free(),
+            "exceptions" : self.exceptions
             }
         __log.debug("read(): ", sm_dict)
         return sm_dict

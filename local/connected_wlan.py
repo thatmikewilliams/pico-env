@@ -17,6 +17,11 @@ class ConnectedWLAN:
         wlan_creds_list = self.__filter_wlan_creds(ssid_secrets, networks)
         self.__connect_or_throw(wlan, wlan_creds_list)
         machine.Pin("LED", machine.Pin.OUT, value=1)
+
+    def shutdown(self):
+        __log.debug("shutdown")
+        machine.Pin("LED", machine.Pin.OUT, value=0)
+        self.__deactivate()
         
     def __activate(self):
         __log.debug("__activate")
@@ -24,6 +29,13 @@ class ConnectedWLAN:
         wlan.disconnect()
         wlan.active(False)
         wlan.active(True)
+        return wlan
+
+    def __deactivate(self):
+        __log.debug("__deactivate")
+        wlan = network.WLAN(network.STA_IF)
+        wlan.disconnect()
+        wlan.active(False)
         return wlan
 
     def __filter_wlan_creds(self, wlan_creds, networks):

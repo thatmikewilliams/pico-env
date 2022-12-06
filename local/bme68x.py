@@ -8,13 +8,25 @@ class BME68X:
         __log.debug(f"__init__(sda={sda}, scl={scl})")
         i2c = PimoroniI2C(sda = sda, scl = scl)
         self.bme = BreakoutBME68X(i2c)
+        self.pressure_adjustment_for_sea_level = 0.0
+        self.altitude = 0
 
+    
+    def set_altitude(self, altitude):
+        self.altitude = altitude
+    
+    def set_pressure_adjustment_for_sea_level_hPa(self, pressure_adjustment_hPa):
+        self.pressure_adjustment_for_sea_level = pressure_adjustment_hPa * 100
+        
     def read(self):
         __log.debug("read()")
         temperature, pressure, humidity, gas_resistance, status, gas_index, meas_index = self.bme.read()
+        sea_level_pressure = pressure + self.pressure_adjustment_for_sea_level
         bme_dict = {
             "temperature" : "{:0.2f}".format(temperature),
-            "pressure" : "{:0.2f}".format(pressure),
+            "local_altitude" : "{:0.2f}".format(self.altitude),
+            "local_pressure" : "{:0.2f}".format(pressure),
+            "sea_level_pressure" : "{:0.2f}".format(sea_level_pressure),
             "humidity" : "{:0.2f}".format(humidity),
             "gas_resistance" : "{:0.2f}".format(gas_resistance),
             "gas_index" : "{:d}".format(gas_index),
